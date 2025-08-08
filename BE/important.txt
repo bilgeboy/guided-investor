@@ -1,0 +1,11 @@
+
+http://localhost:8000/api/price/AAPL → תראה JSON
+
+nice gui for http request
+http://localhost:8000/docs → תראה Swagger UI של ה־API
+
+activate dev server
+uvicorn main:app --reload --port 8000
+
+activate venv
+venv\Scripts\activate
