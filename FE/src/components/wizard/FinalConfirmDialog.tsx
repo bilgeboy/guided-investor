@@ -1,4 +1,3 @@
-// FinalConfirmDialog.tsx
 import * as React from "react";
 import {
   Dialog,
@@ -8,8 +7,8 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-} from "../ui/dialog"; // הנתיב שלך
-import { Button } from "../ui/button";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export default function FinalConfirmDialog({
   open,
@@ -24,33 +23,31 @@ export default function FinalConfirmDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>אישור טרייד</DialogTitle>
           <DialogDescription>
-            בדוק שהכל נראה תקין לפני שליחה לברוקר.
+            בדוק שהכל נכון לפני שליחה לברוקר.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2 text-sm">
-          <div>
-            <b>נכס:</b> {data.symbol}
+          <Row k="נכס" v={data.symbol} />
+          <Row k="מתנדים" v={(data.indicators || []).join(", ")} />
+          <div className="grid gap-2 md:grid-cols-2">
+            <Row k="סכום ($)" v={String(data.amount)} />
+            <Row k="מקס׳ הפסד ($)" v={String(data.maxLoss)} />
           </div>
-          <div>
-            <b>מתנדים:</b> {data.indicators?.join(", ")}
-          </div>
-          <div>
-            <b>סכום:</b> ${data.amount}
-          </div>
-          <div>
-            <b>מקס׳ הפסד:</b> ${data.maxLoss}
-          </div>
-          <div>
-            <b>ברוקר:</b> {data.broker?.name}
+          <div className="grid gap-2 md:grid-cols-2">
+            <Row k="ברוקר" v={data.broker?.name || "—"} />
+            <Row
+              k="API Key"
+              v={data.broker?.apiKey ? mask(data.broker.apiKey) : "—"}
+            />
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="mt-4">
           <DialogClose asChild>
             <Button variant="secondary">בטל</Button>
           </DialogClose>
@@ -59,4 +56,19 @@ export default function FinalConfirmDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+function Row({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="flex items-center justify-between rounded-md border p-2">
+      <span className="text-muted-foreground">{k}</span>
+      <span className="font-medium">{v || "—"}</span>
+    </div>
+  );
+}
+
+function mask(s: string) {
+  if (!s) return "—";
+  if (s.length <= 6) return "••••";
+  return s.slice(0, 3) + "••••" + s.slice(-3);
 }

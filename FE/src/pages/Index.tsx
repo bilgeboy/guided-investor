@@ -15,16 +15,16 @@ const mockStocks = [
     change: 2.45,
     changePercent: 1.27,
     aiRecommendation: "buy" as const,
-    aiConfidence: 85
+    aiConfidence: 85,
   },
   {
     symbol: "NVDA",
     name: "NVIDIA Corporation",
-    price: 875.20,
-    change: -12.30,
+    price: 875.2,
+    change: -12.3,
     changePercent: -1.39,
     aiRecommendation: "hold" as const,
-    aiConfidence: 72
+    aiConfidence: 72,
   },
   {
     symbol: "MSFT",
@@ -33,7 +33,7 @@ const mockStocks = [
     change: 5.67,
     changePercent: 1.37,
     aiRecommendation: "buy" as const,
-    aiConfidence: 90
+    aiConfidence: 90,
   },
   {
     symbol: "TSLA",
@@ -42,8 +42,8 @@ const mockStocks = [
     change: -8.92,
     changePercent: -3.51,
     aiRecommendation: "sell" as const,
-    aiConfidence: 78
-  }
+    aiConfidence: 78,
+  },
 ];
 
 const Index = () => {
@@ -78,7 +78,9 @@ const Index = () => {
                     <Brain className="w-5 h-5 text-success" />
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground">AI פעיל ומעקב</p>
+                    <p className="font-semibold text-foreground">
+                      AI פעיל ומעקב
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       מנתח 847 מניות | עודכן לפני 2 דקות
                     </p>
@@ -103,10 +105,14 @@ const Index = () => {
                     <Activity className="w-5 h-5 text-success" />
                     <div>
                       <p className="font-medium text-foreground">קנייה: AAPL</p>
-                      <p className="text-sm text-muted-foreground">5 מניות ב-$195.84</p>
+                      <p className="text-sm text-muted-foreground">
+                        5 מניות ב-$195.84
+                      </p>
                     </div>
                   </div>
-                  <span className="text-sm text-muted-foreground">לפני 5 דקות</span>
+                  <span className="text-sm text-muted-foreground">
+                    לפני 5 דקות
+                  </span>
                 </div>
 
                 <div className="flex items-center justify-between p-3 rounded-lg bg-danger/10 border border-danger/20">
@@ -114,10 +120,14 @@ const Index = () => {
                     <Activity className="w-5 h-5 text-danger" />
                     <div>
                       <p className="font-medium text-foreground">מכירה: TSLA</p>
-                      <p className="text-sm text-muted-foreground">3 מניות ב-$245.67</p>
+                      <p className="text-sm text-muted-foreground">
+                        3 מניות ב-$245.67
+                      </p>
                     </div>
                   </div>
-                  <span className="text-sm text-muted-foreground">לפני 12 דקות</span>
+                  <span className="text-sm text-muted-foreground">
+                    לפני 12 דקות
+                  </span>
                 </div>
 
                 <div className="flex items-center justify-between p-3 rounded-lg bg-warning/10 border border-warning/20">
@@ -125,10 +135,14 @@ const Index = () => {
                     <AlertCircle className="w-5 h-5 text-warning" />
                     <div>
                       <p className="font-medium text-foreground">התראה: NVDA</p>
-                      <p className="text-sm text-muted-foreground">ירידת מחיר משמעותית</p>
+                      <p className="text-sm text-muted-foreground">
+                        ירידת מחיר משמעותית
+                      </p>
                     </div>
                   </div>
-                  <span className="text-sm text-muted-foreground">לפני 18 דקות</span>
+                  <span className="text-sm text-muted-foreground">
+                    לפני 18 דקות
+                  </span>
                 </div>
               </div>
             </TradingCard>

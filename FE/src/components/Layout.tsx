@@ -2,6 +2,18 @@ import { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, User, Settings, LogOut, Menu } from "lucide-react";
 import { TradingButton } from "./TradingButton";
+import { Link } from "react-router-dom";
+import { Sun, Moon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import ThemeToggle from "./ThemeToggle";
 
 interface LayoutProps {
   children: ReactNode;
@@ -29,29 +41,89 @@ export function Layout({ children, showHeader = true }: LayoutProps) {
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-6">
-              <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+              <Button
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 דשבורד
               </Button>
-              <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+              <Button
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 פורטפוליו
               </Button>
-              <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+              <Button
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 היסטוריה
               </Button>
-              <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+              <Button
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 תמחור
+              </Button>
+              <Button
+                asChild
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Link to="/wizard">סוחר חכם</Link>
+              </Button>
+              <Button
+                asChild
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Link to="/backtest-wizard">מסחר בק-טסט</Link>
+              </Button>
+              <Button
+                asChild
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Link to="/beginner-wizard">קניה ראשונה</Link>
               </Button>
             </nav>
 
             {/* User Actions */}
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-                <Settings className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label="Settings"
+                  >
+                    <Settings className="w-5 h-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuLabel>Appearance</DropdownMenuLabel>
+
+                  {/* Bright/Dark toggle row */}
+                  <ThemeToggle />
+
+                  <DropdownMenuSeparator />
+                  {/* אפשר להשאיר למעלה מקום לעוד הגדרות בעתיד */}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <User className="w-5 h-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-foreground md:hidden"
+              >
                 <Menu className="w-5 h-5" />
               </Button>
             </div>
@@ -60,9 +132,7 @@ export function Layout({ children, showHeader = true }: LayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
-        {children}
-      </main>
+      <main className="container mx-auto px-4 py-6">{children}</main>
     </div>
   );
 }
