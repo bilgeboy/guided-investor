@@ -8,5 +8,13 @@ class Settings:
         "http://localhost:3000",
         "*",
     ]
+    # AI
+    AI_PROVIDER: str = os.getenv("AI_PROVIDER", "groq")  # groq | openrouter | ollama
+    AI_ENDPOINT: str = os.getenv("AI_ENDPOINT", "https://api.groq.com/openai/v1/chat/completions")
+    AI_MODEL: str = os.getenv("AI_MODEL", "llama3-8b-8192")
+    AI_API_KEY: Optional[str] = os.getenv("AI_API_KEY")
+
+    OLLAMA_ENDPOINT: str = os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434/api/generate")
+    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 
 settings = Settings()

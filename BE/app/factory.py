@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .settings import settings
 from .routers import strategies
+from .routers import run
 from .sockets import stream
 
 def create_app() -> FastAPI:
@@ -17,6 +18,7 @@ def create_app() -> FastAPI:
 
     # Routers
     app.include_router(strategies.router, prefix="/api")
+    app.include_router(run.router, prefix="/api")
     # WebSocket endpoint (registered as route function)
     app.add_api_websocket_route("/ws/stream", stream.stream_endpoint)
 
