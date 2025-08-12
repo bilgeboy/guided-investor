@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import asyncio
 from ..routers.strategies import STRATS
 from ..services.candles import get_candles
-from ..services.indicators import compute_indicators
+from ..services.indicatiors import compute_indicators
 from ..services.ai import ask_ai_free
 
 router = APIRouter(tags=["run"])
