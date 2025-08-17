@@ -1,11 +1,12 @@
 import json, datetime
-import regex as re
+import re
 import httpx
 from typing import Dict, Any
 from ..settings import settings
+from groq import Groq  # Add this import for Groq SDK
 
 # מחלץ את ה-JSON מהתשובה גם אם המודל יספר "סיפור" מסביב
-JSON_RE = re.compile(r"\{(?:[^{}]|(?R))*\}", re.S)
+JSON_RE = re.compile(r"\{.*?\}", re.S)
 
 SYSTEM_PROMPT = (
     "You are a trading decision engine. "
@@ -61,23 +62,24 @@ def _safe_parse_json(text: str) -> Dict[str, Any]:
         return {"action":"hold","confidence":0.1,"reason":"parse-failed","stop_loss":None,"take_profit":None}
 
 async def _call_groq(system: str, user: str) -> Dict[str, Any]:
-    headers = {"Authorization": f"Bearer {settings.AI_API_KEY}", "Content-Type":"application/json"}
-    payload = {
-        "model": settings.AI_MODEL,
-        "messages": [
-            {"role":"system","content": system},
-            {"role":"user","content": user}
-        ],
-        "temperature": 0.2,
-        "response_format": { "type": "text" }  # נשאיר טקסט ומחלצים JSON ידנית
-    }
     async with httpx.AsyncClient(timeout=60) as c:
-        r = await c.post(settings.AI_ENDPOINT, headers=headers, json=payload)
+        r = await c.post(
+            settings.AI_ENDPOINT,
+            headers={"Authorization": f"Bearer {settings.AI_API_KEY}"},
+            json={
+                "model": settings.AI_MODEL,
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user}
+                ],
+                "temperature": 0.2
+            }
+        )
         r.raise_for_status()
         data = r.json()
-    # OpenAI-compatible: choices[0].message.content
-    text = (data.get("choices") or [{}])[0].get("message",{}).get("content","")
-    return _safe_parse_json(text)
+        text = (data.get("choices") or [{}])[0].get("message",{}).get("content","")
+        return _safe_parse_json(text)
+    
 
 async def _call_openrouter(system: str, user: str) -> Dict[str, Any]:
     headers = {"Authorization": f"Bearer {settings.AI_API_KEY}", "Content-Type":"application/json"}

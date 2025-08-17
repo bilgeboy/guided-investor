@@ -50,3 +50,25 @@ async def run_loop(sid: str, symbol: str, tf: str):
         except Exception:
             pass
         await asyncio.sleep(period)
+
+@router.post("/test-ai")
+async def run_strategy(req: RunReq):
+    print("request to test AI:", req)
+    # הכנס פה דמי (mock) עבור candles ו-indicators
+    candles = [{"open":100,"high":105,"low":95,"close":102}]*50
+    print(candles)
+    ind = {"SMA": 101}
+    decision = await ask_ai_free(
+        symbol=req.symbol,
+        tf=req.timeframe,
+        o=candles[-1]["open"],
+        h=candles[-1]["high"],
+        l=candles[-1]["low"],
+        c=candles[-1]["close"],
+        ind=ind,
+        closes=[x["close"] for x in candles[-50:]],
+        rules=[],
+        amount=1000,
+        max_loss=50
+    )
+    return {"ai_decision": decision}

@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: FastAPI",
+      "type": "python",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["main:app", "--port", "8000", "--reload"],
+      "python": "C:\\Users\\orsh2\\Desktop\\Or\\projects\\guided-investor\\BE\\venv\\Scripts\\python.exe",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}/BE",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/BE"
+      }
+    }
+  ]
+}
