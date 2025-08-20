@@ -5,7 +5,7 @@ import httpx
 import pandas as pd
 import time
 
-from .fin_apis.twelve_data import fetch_ohlc_twelve_data
+from .fin_apis.twelve_data import fetch_ohlc_twelve_data, fetch_ohlc_twelve_data_5000, json_file_to_df
 from .indicators.calc_indicators import calculate_indicators
 from .check_entry import check_entry_conditions
 from ..models import StockStrategy, BacktestRequest
@@ -19,7 +19,8 @@ async def run_backtest(stocks: List[StockStrategy]):
 
     for stock in stocks:
         start_date = stock.start_date.isoformat() if stock.start_date else "1900-01-01"
-        ohlc = await fetch_ohlc_twelve_data(stock.symbol, stock.timeframe, start_date)
+        # ohlc = await fetch_ohlc_twelve_data_5000(stock.symbol, stock.timeframe, start_date)
+        ohlc = json_file_to_df()
         ohlc = calculate_indicators(ohlc, stock.entry_rules, stock.timeframe)
         ohlc = check_entry_conditions(ohlc, stock.entry_rules)
         

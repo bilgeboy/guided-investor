@@ -13,14 +13,14 @@ def check_entry_conditions(df: pd.DataFrame, entry_rules: List[IndicatorRule]) -
     result = pd.Series(True, index=df.index)  # נניח שכל החוקים צריכים להתקיים (AND)
 
     for rule in entry_rules:
-        ind_name = rule.indicator
+        ind_name = rule.indicator.upper()
         op = rule.operator
         value = rule.value
 
         # סדרת השוואה – אם value לא מוגדר משווים ל-close
         series = df[ind_name]
         # TODO: CAPITAL LETTERS THATS probably the problem
-        comp_series = pd.Series([value]*len(df), index=df.index) if value is not None else df["close"]
+        comp_series = df["close"] if (value is None or value is False or (isinstance(value, (int, float)) and value <= 0)) else pd.Series([value]*len(df), index=df.index)
 
         if op == ">":
             mask = series > comp_series
@@ -41,4 +41,6 @@ def check_entry_conditions(df: pd.DataFrame, entry_rules: List[IndicatorRule]) -
 
         result &= mask
 
-    return result
+    df["entry_signal"] = result
+
+    return df
