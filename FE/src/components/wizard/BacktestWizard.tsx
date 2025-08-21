@@ -21,6 +21,9 @@ import { cn } from "@/lib/utils";
 import { mockBacktestRun } from "@/api/mock";
 import RuleBuilder from "./RuleBuilder";
 import { IndicatorFormSchema } from "./indicatorSchema";
+import TradesTable from "./TradesTable";
+import api from "@/api/axiosInstance"; // ייבוא של האינסְטנס שלך
+import axios from "axios";
 
 const BacktestSchema = IndicatorFormSchema.extend({
   symbols: z.array(z.string().min(1)).min(1, "בחר לפחות נכס אחד"),
@@ -93,11 +96,90 @@ export default function BacktestWizard() {
   };
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
+  const PAYLOAD_MOCK = {
+    stocks: [
+      {
+        symbol: "AAPL",
+        investment: 1000,
+        max_loss: 50,
+        timeframe: "1h",
+        start_date: "2021-01-01",
+        since_ipo: false,
+        entry_rules: [
+          {
+            indicator: "sma",
+            operator: "<",
+            value: 0,
+          },
+        ],
+        exit_conditions: [
+          {
+            type: "take_profit",
+            value: 100,
+          },
+          {
+            type: "stop_loss",
+            value: 50,
+          },
+        ],
+      },
+      {
+        symbol: "NVDA",
+        investment: 500,
+        max_loss: 25,
+        timeframe: "5m",
+        start_date: "2021-01-01",
+        since_ipo: false,
+        entry_rules: [
+          {
+            indicator: "sma",
+            operator: "crossesAbove",
+            value: 200,
+          },
+        ],
+        exit_conditions: [
+          {
+            type: "take_profit",
+            profit: 50,
+          },
+          {
+            type: "stop_loss",
+            loss: 25,
+          },
+        ],
+      },
+    ],
+  };
+
   const onRun = handleSubmit(async (payload) => {
-    setRunning(true);
-    const res = await mockBacktestRun(payload);
-    setResult(res);
-    setRunning(false);
+    try {
+      setRunning(true);
+
+      console.log("Payload to send:", payload);
+
+      const health = await axios.get("http://localhost:8000/health");
+      console.log("Health check:", health.data);
+
+      // שליחה ישירה ל-BE
+      const res = await axios.post(
+        "http://localhost:8000/api/strategies-test",
+        PAYLOAD_MOCK,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      setResult(res.data.results);
+    } catch (error: any) {
+      console.error("Backtest failed:", error);
+      alert(
+        error.response?.data?.message || "הרצת הבק-טסט נכשלה. בדוק את הקונסול."
+      );
+    } finally {
+      setRunning(false);
+    }
   });
 
   return (
@@ -343,29 +425,42 @@ export default function BacktestWizard() {
               </div>
 
               {result && (
-                <Card className="mt-4">
-                  <CardHeader>
-                    <CardTitle>תוצאות (Mock)</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm grid grid-cols-2 gap-3">
-                    <SummaryRow
-                      label="עסקאות"
-                      value={String(result.summary.totalTrades)}
-                    />
-                    <SummaryRow
-                      label="Win Rate"
-                      value={(result.summary.winRate * 100).toFixed(1) + "%"}
-                    />
-                    <SummaryRow
-                      label="ממוצע P&L"
-                      value={result.summary.avgPnL + "%"}
-                    />
-                    <SummaryRow
-                      label="Max DD"
-                      value={result.summary.maxDrawdown + "%"}
-                    />
-                  </CardContent>
-                </Card>
+                <>
+                  <Card className="mt-4">
+                    <CardHeader>
+                      <CardTitle>סיכום</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-sm grid grid-cols-2 gap-3">
+                      <SummaryRow
+                        label="עסקאות"
+                        value={String(result[0].summary.num_trades)}
+                      />
+                      <SummaryRow
+                        label="Win Rate"
+                        value={
+                          (result[0].summary.win_rate * 100).toFixed(1) + "%"
+                        }
+                      />
+                      <SummaryRow
+                        label="ממוצע P&L"
+                        value={result[0].summary.avg_deal_profit + "%"}
+                      />
+                      <SummaryRow
+                        label="Max DD"
+                        value={result[0].summary.cumulative_return_pct + "%"}
+                      />
+                    </CardContent>
+                  </Card>
+
+                  <Card className="mt-4">
+                    <CardHeader>
+                      <CardTitle>פרטי העסקאות</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <TradesTable trades={result[0].trades} />
+                    </CardContent>
+                  </Card>
+                </>
               )}
             </section>
           )}

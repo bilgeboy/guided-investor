@@ -19,7 +19,6 @@ def check_entry_conditions(df: pd.DataFrame, entry_rules: List[IndicatorRule]) -
 
         # סדרת השוואה – אם value לא מוגדר משווים ל-close
         series = df[ind_name]
-        # TODO: CAPITAL LETTERS THATS probably the problem
         comp_series = df["close"] if (value is None or value is False or (isinstance(value, (int, float)) and value <= 0)) else pd.Series([value]*len(df), index=df.index)
 
         if op == ">":
