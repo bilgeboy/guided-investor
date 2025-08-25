@@ -24,6 +24,7 @@ import { IndicatorFormSchema } from "./indicatorSchema";
 import TradesTable from "./TradesTable";
 import api from "@/api/axiosInstance"; // ייבוא של האינסְטנס שלך
 import axios from "axios";
+import TradesChart from "../LightweughtCharts";
 
 const BacktestSchema = IndicatorFormSchema.extend({
   symbols: z.array(z.string().min(1)).min(1, "בחר לפחות נכס אחד"),
@@ -424,44 +425,74 @@ export default function BacktestWizard() {
                 </Button>
               </div>
 
-              {result && (
-                <>
+              {result?.map((resItem: any, index: number) => (
+                <div key={index}>
                   <Card className="mt-4">
                     <CardHeader>
-                      <CardTitle>סיכום</CardTitle>
+                      <CardTitle>סיכום - סט {resItem.symbol}</CardTitle>
                     </CardHeader>
                     <CardContent className="text-sm grid grid-cols-2 gap-3">
                       <SummaryRow
                         label="עסקאות"
-                        value={String(result[0].summary.num_trades)}
+                        value={new Intl.NumberFormat("en-US").format(
+                          resItem.summary.num_trades
+                        )}
                       />
                       <SummaryRow
                         label="Win Rate"
-                        value={
-                          (result[0].summary.win_rate * 100).toFixed(1) + "%"
-                        }
+                        value={new Intl.NumberFormat("en-US", {
+                          style: "percent",
+                          minimumFractionDigits: 1,
+                          maximumFractionDigits: 1,
+                        }).format(resItem.summary.win_rate / 100)}
                       />
                       <SummaryRow
                         label="ממוצע P&L"
-                        value={result[0].summary.avg_deal_profit + "%"}
+                        value={
+                          new Intl.NumberFormat("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }).format(resItem.summary.avg_deal_profit) + "%"
+                        }
                       />
                       <SummaryRow
                         label="Max DD"
-                        value={result[0].summary.cumulative_return_pct + "%"}
+                        value={
+                          new Intl.NumberFormat("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }).format(resItem.summary.cumulative_return_pct) + "%"
+                        }
                       />
                     </CardContent>
                   </Card>
 
                   <Card className="mt-4">
                     <CardHeader>
-                      <CardTitle>פרטי העסקאות</CardTitle>
+                      <CardTitle>פרטי העסקאות - סט {resItem.symbol}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <TradesTable trades={result[0].trades} />
+                      {/* גרף */}
+                      {/* <TradesChart
+                        trades={resItem.trades}
+                        symbol={resItem.symbol}
+                        ohlc={resItem.data}
+                      /> */}
+
+                      {/* טבלה */}
+                      <TradesTable
+                        trades={resItem.trades.map((t: any) => ({
+                          ...t,
+                          entry_price: Number(t.entry_price.toFixed(2)),
+                          exit_price: Number(t.exit_price.toFixed(2)),
+                          pnl: Number(t.pnl.toFixed(2)),
+                          pct_return: Number(t.pct_return.toFixed(2)),
+                        }))}
+                      />
                     </CardContent>
                   </Card>
-                </>
-              )}
+                </div>
+              ))}
             </section>
           )}
 

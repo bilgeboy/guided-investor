@@ -22,6 +22,7 @@ async def run_backtest(stocks: List[StockStrategy]):
         start_date = stock.start_date.isoformat() if stock.start_date else "1900-01-01"
         # ohlc = await fetch_ohlc_twelve_data_5000(stock.symbol, stock.timeframe, start_date)
         ohlc = json_file_to_df()
+        candles = ohlc.to_json()
         ohlc = calculate_indicators(ohlc, stock.entry_rules, stock.timeframe)
         ohlc = check_entry_conditions(ohlc, stock.entry_rules)
         ohlc, trades = await process_trades(ohlc, stock)
@@ -35,7 +36,8 @@ async def run_backtest(stocks: List[StockStrategy]):
         results.append({
             "symbol": stock.symbol,
             "trades": trades,
-            "summary": summary
+            "summary": summary,
+            "data": candles,  # TODO: remove this line if makes this heavy
         })
 
         break # TODO: delete it. the json file has NVDA info and it make fail
