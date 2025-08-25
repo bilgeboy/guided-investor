@@ -3,6 +3,8 @@ import ta  # ספריית TA-Lib חיצונית לחישוב אינדיקטור�
 from typing import List, Dict, Any
 
 # כל אינדיקטור הוא פונקציה שמקבלת df ופרמטרים
+# TODO: add more indicators from ta and make the wondow and the df parameters dynamic
+# TODO: CHECK FOR OTHER FUNDAMENTAL INDICATORS LIKE ANALYST RECOMMENDATIONS AND EARNINGS SURPRISES AND IMPLEMENT THEM HERE
 def calculate_rsi(df: pd.DataFrame, period: int = 14):
     df["RSI"] = ta.momentum.RSIIndicator(df["close"], window=14).rsi()
     return df
@@ -49,3 +51,21 @@ def calculate_indicators(df: pd.DataFrame, entry_rules: List[Dict[str, Any]], ti
             print(f"Indicator {ind_name} not implemented yet.")
 
     return df
+
+# פונקציה עוטפת רק ל-exit_conditions
+def calculate_exit_indicators(df: pd.DataFrame, exit_conditions: List[Dict[str, Any]], timeframe: str):
+    """
+    שולף רק exit_conditions מסוג indicator
+    ומעביר לפונקציה הראשית את ה-indicator_rule
+    """
+    # indicator_rules = [
+    #     cond["indicator_rule"]
+    #     for cond in exit_conditions
+    #     if cond.type == "indicator" and "indicator_rule" in list(cond.model_fields.keys()) and cond.indicator_rule is not None
+    # ]
+    indicator_rules=[]
+    for cond in exit_conditions:
+        if cond.type == "indicator" and "indicator_rule" in list(cond.model_fields.keys()) and cond.indicator_rule != None:
+            indicator_rules.append(cond.indicator_rule)
+
+    return calculate_indicators(df, indicator_rules, timeframe)

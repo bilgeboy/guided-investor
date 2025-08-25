@@ -141,11 +141,11 @@ export default function BacktestWizard() {
         exit_conditions: [
           {
             type: "take_profit",
-            profit: 50,
+            value: 50,
           },
           {
             type: "stop_loss",
-            loss: 25,
+            value: 25,
           },
         ],
       },

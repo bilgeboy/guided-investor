@@ -52,6 +52,7 @@ async def process_trades(ohlc: pd.DataFrame, stock: StockStrategy):
             ohlc.at[idx, "pnl"] = pnl
 
             # בדיקה ל-TP / SL אם קיימים
+            # TODO: implement technical indicators checks
             exit_flag = False
             for condition in sl_or_tp:  # עבר על כל תנאי יציאה
               ctype = condition.type
@@ -61,7 +62,9 @@ async def process_trades(ohlc: pd.DataFrame, stock: StockStrategy):
                   exit_flag = True
               elif ctype == "stop_loss" and pnl <= -cvalue:
                   exit_flag = True
-
+            
+            if row.get("exit_signal", False):
+                exit_flag = True
 
             if exit_flag:
                 in_position = False
