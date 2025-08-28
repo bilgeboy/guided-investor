@@ -1,4 +1,4 @@
-// src/components/wizard/RuleBuilder.tsx
+// src/components/wizard/StockRuleBuilder.tsx
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,21 +13,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Trash2, Plus } from "lucide-react";
-import {
-  IndicatorFormData,
-  IndicatorTypes,
-  Operators,
-  Timeframes,
-} from "./indicatorSchema";
+import { IndicatorTypes, Operators } from "./indicatorSchema";
 
-export default function RuleBuilder() {
-  const { control, watch, setValue } = useFormContext<IndicatorFormData>();
-  const { fields, append, remove } = useFieldArray({ control, name: "rules" });
+export default function RuleBuilder({ stockIndex }: { stockIndex: number }) {
+  const { control, watch, setValue } = useFormContext<any>();
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: `stocks.${stockIndex}.rules`,
+  });
+
+  const rulesWatch = watch(`stocks.${stockIndex}.rules`);
 
   const addPreset = () =>
     append({
       indicator: "rsi",
-      timeframe: "1m",
       params: { period: 14, source: "close" },
       operator: "crossesBelow",
       value: 30,
@@ -38,45 +37,28 @@ export default function RuleBuilder() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-base font-semibold">קריטריונים (Rules)</h3>
-        <div className="flex gap-2">
-          <Button variant="secondary" onClick={addPreset}>
-            <Plus className="h-4 w-4 mr-1" />
-            הוסף RSI 30
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() =>
-              append({
-                indicator: "macd",
-                timeframe: "1m",
-                params: { fast: 12, slow: 26, signal: 9, source: "close" },
-                operator: "crossesAbove",
-                compareTo: "none",
-              })
-            }
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            הוסף MACD חוצה מעלה
-          </Button>
-        </div>
+        <div className="flex gap-2">{/* כאן אפשר לשים כפתורי presets */}</div>
       </div>
 
       {fields.map((f, idx) => {
-        const rule = watch(`rules.${idx}`);
+        const rule = rulesWatch[idx];
         return (
           <Card key={f.id} className="border">
             <CardContent className="space-y-3 pt-4">
               <div className="flex items-center justify-between">
                 <div className="grid grid-cols-3 gap-3 w-full md:w-2/3">
-                  {/* Indicator */}
                   <div>
                     <Label>אינדיקטור</Label>
                     <Select
                       value={rule.indicator}
                       onValueChange={(v) =>
-                        setValue(`rules.${idx}.indicator`, v as any, {
-                          shouldValidate: true,
-                        })
+                        setValue(
+                          `stocks.${stockIndex}.rules.${idx}.indicator`,
+                          v as any,
+                          {
+                            shouldValidate: true,
+                          }
+                        )
                       }
                     >
                       <SelectTrigger>
@@ -92,39 +74,19 @@ export default function RuleBuilder() {
                     </Select>
                   </div>
 
-                  {/* Timeframe */}
-                  <div>
-                    <Label>טיימפריים</Label>
-                    <Select
-                      value={rule.timeframe}
-                      onValueChange={(v) =>
-                        setValue(`rules.${idx}.timeframe`, v as any, {
-                          shouldValidate: true,
-                        })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="בחר" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Timeframes.map((tf) => (
-                          <SelectItem key={tf} value={tf}>
-                            {tf}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
                   {/* Operator */}
                   <div>
                     <Label>תנאי</Label>
                     <Select
                       value={rule.operator}
                       onValueChange={(v) =>
-                        setValue(`rules.${idx}.operator`, v as any, {
-                          shouldValidate: true,
-                        })
+                        setValue(
+                          `stocks.${stockIndex}.rules.${idx}.operator`,
+                          v as any,
+                          {
+                            shouldValidate: true,
+                          }
+                        )
                       }
                     >
                       <SelectTrigger>
@@ -148,8 +110,8 @@ export default function RuleBuilder() {
 
               <Separator />
 
-              {/* Params per indicator */}
-              <IndicatorParams idx={idx} />
+              {/* Params */}
+              <IndicatorParams idx={idx} stockIndex={stockIndex} />
 
               {/* Threshold / Compare */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -162,7 +124,10 @@ export default function RuleBuilder() {
                       type="number"
                       value={rule.value ?? ""}
                       onChange={(e) =>
-                        setValue(`rules.${idx}.value`, Number(e.target.value))
+                        setValue(
+                          `stocks.${stockIndex}.rules.${idx}.value`,
+                          Number(e.target.value)
+                        )
                       }
                       placeholder={
                         rule.indicator === "rsi" ? "לדוג׳ 30 או 70" : "ערך סף"
@@ -178,7 +143,10 @@ export default function RuleBuilder() {
                       <Select
                         value={rule.compareTo ?? "price"}
                         onValueChange={(v) =>
-                          setValue(`rules.${idx}.compareTo`, v as any)
+                          setValue(
+                            `stocks.${stockIndex}.rules.${idx}.compareTo`,
+                            v as any
+                          )
                         }
                       >
                         <SelectTrigger>
@@ -199,7 +167,7 @@ export default function RuleBuilder() {
                           value={rule.comparePeriod ?? 50}
                           onChange={(e) =>
                             setValue(
-                              `rules.${idx}.comparePeriod`,
+                              `stocks.${stockIndex}.rules.${idx}.comparePeriod`,
                               Number(e.target.value)
                             )
                           }
@@ -220,7 +188,6 @@ export default function RuleBuilder() {
         onClick={() =>
           append({
             indicator: "rsi",
-            timeframe: "1m",
             params: { period: 14, source: "close" },
             operator: "crossesAbove",
             value: 70,
@@ -235,10 +202,17 @@ export default function RuleBuilder() {
 }
 
 /* --------- פרמטרים דינמיים לפי אינדיקטור --------- */
-function IndicatorParams({ idx }: { idx: number }) {
+function IndicatorParams({
+  idx,
+  stockIndex,
+}: {
+  idx: number;
+  stockIndex: number;
+}) {
   const { watch, setValue } = useFormContext<any>();
-  const rule = watch(`rules.${idx}`);
+  const rule = watch(`stocks.${stockIndex}.rules.${idx}`);
 
+  // ה־params כמו קודם, רק עם path מותאם ל-stocks
   if (
     rule.indicator === "rsi" ||
     rule.indicator === "cci" ||
@@ -260,7 +234,10 @@ function IndicatorParams({ idx }: { idx: number }) {
                 : 50)
             }
             onChange={(e) =>
-              setValue(`rules.${idx}.params.period`, Number(e.target.value))
+              setValue(
+                `stocks.${stockIndex}.rules.${idx}.params.period`,
+                Number(e.target.value)
+              )
             }
           />
         </div>
@@ -269,7 +246,10 @@ function IndicatorParams({ idx }: { idx: number }) {
           <Select
             value={rule.params?.source ?? "close"}
             onValueChange={(v) =>
-              setValue(`rules.${idx}.params.source`, v as any)
+              setValue(
+                `stocks.${stockIndex}.rules.${idx}.params.source`,
+                v as any
+              )
             }
           >
             <SelectTrigger>
@@ -296,7 +276,10 @@ function IndicatorParams({ idx }: { idx: number }) {
             type="number"
             value={rule.params?.fast ?? 12}
             onChange={(e) =>
-              setValue(`rules.${idx}.params.fast`, Number(e.target.value))
+              setValue(
+                `stocks.${stockIndex}.rules.${idx}.params.fast`,
+                Number(e.target.value)
+              )
             }
           />
         </div>
@@ -306,7 +289,10 @@ function IndicatorParams({ idx }: { idx: number }) {
             type="number"
             value={rule.params?.slow ?? 26}
             onChange={(e) =>
-              setValue(`rules.${idx}.params.slow`, Number(e.target.value))
+              setValue(
+                `stocks.${stockIndex}.rules.${idx}.params.slow`,
+                Number(e.target.value)
+              )
             }
           />
         </div>
@@ -316,7 +302,10 @@ function IndicatorParams({ idx }: { idx: number }) {
             type="number"
             value={rule.params?.signal ?? 9}
             onChange={(e) =>
-              setValue(`rules.${idx}.params.signal`, Number(e.target.value))
+              setValue(
+                `stocks.${stockIndex}.rules.${idx}.params.signal`,
+                Number(e.target.value)
+              )
             }
           />
         </div>
@@ -325,7 +314,10 @@ function IndicatorParams({ idx }: { idx: number }) {
           <Select
             value={rule.params?.source ?? "close"}
             onValueChange={(v) =>
-              setValue(`rules.${idx}.params.source`, v as any)
+              setValue(
+                `stocks.${stockIndex}.rules.${idx}.params.source`,
+                v as any
+              )
             }
           >
             <SelectTrigger>
@@ -352,7 +344,10 @@ function IndicatorParams({ idx }: { idx: number }) {
             type="number"
             value={rule.params?.period ?? 20}
             onChange={(e) =>
-              setValue(`rules.${idx}.params.period`, Number(e.target.value))
+              setValue(
+                `stocks.${stockIndex}.rules.${idx}.params.period`,
+                Number(e.target.value)
+              )
             }
           />
         </div>
@@ -362,7 +357,10 @@ function IndicatorParams({ idx }: { idx: number }) {
             type="number"
             value={rule.params?.stddev ?? 2}
             onChange={(e) =>
-              setValue(`rules.${idx}.params.stddev`, Number(e.target.value))
+              setValue(
+                `stocks.${stockIndex}.rules.${idx}.params.stddev`,
+                Number(e.target.value)
+              )
             }
           />
         </div>
@@ -371,7 +369,10 @@ function IndicatorParams({ idx }: { idx: number }) {
           <Select
             value={rule.params?.source ?? "close"}
             onValueChange={(v) =>
-              setValue(`rules.${idx}.params.source`, v as any)
+              setValue(
+                `stocks.${stockIndex}.rules.${idx}.params.source`,
+                v as any
+              )
             }
           >
             <SelectTrigger>

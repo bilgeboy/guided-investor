@@ -9,7 +9,16 @@ export const IndicatorTypes = [
   "ema",
   "bbands",
 ] as const;
-export const Timeframes = ["1m", "5m", "15m", "1h", "4h", "1d"] as const;
+export const Timeframes = [
+  "1m",
+  "5m",
+  "15m",
+  "1h",
+  "4h",
+  "1d",
+  "1w",
+  "1M",
+] as const;
 export const Operators = [
   "crossesAbove",
   "crossesBelow",
@@ -21,7 +30,6 @@ export const Operators = [
 
 export const RuleSchema = z.object({
   indicator: z.enum(IndicatorTypes),
-  timeframe: z.enum(Timeframes).default("1m"),
   // פרמטרים ייחודיים לכל אינדיקטור
   params: z
     .object({
@@ -47,3 +55,47 @@ export const IndicatorFormSchema = z.object({
   rules: z.array(RuleSchema).min(1, "הוסף לפחות חוק אחד"),
 });
 export type IndicatorFormData = z.infer<typeof IndicatorFormSchema>;
+
+// --- ExitCondition
+export const ExitConditionSchema = z.object({
+  type: z.enum(["take_profit", "stop_loss", "indicator"]),
+  value: z.number().optional(),
+  indicator_rule: RuleSchema.optional(),
+});
+
+export type ExitCondition = z.infer<typeof ExitConditionSchema>;
+
+// --- EarningsPlay / NewsPlay
+export const EarningsPlaySchema = z.object({
+  enabled: z.boolean().default(false),
+  daysBefore: z.number().int().min(0).max(30).default(2),
+  daysAfter: z.number().int().min(0).max(30).default(2),
+});
+
+export const NewsPlaySchema = z.object({
+  enabled: z.boolean().default(false),
+  category: z.enum(["all", "financial", "tech", "regulatory"]).default("all"),
+});
+
+// --- StockStrategy
+export const StockStrategySchema = z.object({
+  symbol: z.string().min(1),
+  investment: z.number().positive(),
+  max_loss: z.number().positive(),
+  timeframe: z.enum(Timeframes),
+  start_date: z.string().optional(), // FE שולח כ-string, BE ממפה ל-date
+  since_ipo: z.boolean().default(false),
+  entry_rules: z.array(RuleSchema).min(1),
+  exit_conditions: z.array(ExitConditionSchema).min(1),
+  earningsPlay: EarningsPlaySchema,
+  newsPlay: NewsPlaySchema,
+});
+
+export type StockStrategy = z.infer<typeof StockStrategySchema>;
+
+// --- BacktestRequest
+export const BacktestRequestSchema = z.object({
+  stocks: z.array(StockStrategySchema).min(1),
+});
+
+export type BacktestRequest = z.infer<typeof BacktestRequestSchema>;
