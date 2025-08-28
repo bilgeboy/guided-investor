@@ -21,4 +21,14 @@ class Settings:
     OLLAMA_ENDPOINT: str = os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434/api/generate")
     OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 
+    # MongoDB
+    MONGO_USER: Optional[str] = os.getenv("MONGO_USER")
+    MONGO_PASSWORD: Optional[str] = os.getenv("MONGO_PASSWORD")
+    MONGO_CLUSTER: Optional[str] = os.getenv("MONGO_CLUSTER")
+    MONGO_DB: Optional[str] = os.getenv("MONGO_DB", "ai_trading")
+
+    @property
+    def MONGO_URI(self) -> str:
+        return f"mongodb+srv://{self.MONGO_USER}:{self.MONGO_PASSWORD}@{self.MONGO_CLUSTER}/{self.MONGO_DB}?retryWrites=true&w=majority"
+
 settings = Settings()
