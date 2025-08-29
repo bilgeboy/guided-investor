@@ -130,7 +130,7 @@ async def fetch_ohlc_twelve_data_5000(symbol: str, interval: str, start_date: st
     """
     interval_map = {
         "1m": "1min", "5m": "5min", "15m": "15min", "60m": "1h",
-        "1h": "1h", "1d": "1D", "1w": "1W", "1M": "1M"
+        "1h": "1h", "1d": "1day", "1w": "1W", "1M": "1M"
     }
     td_interval = interval_map.get(interval, "1min")
     start_dt = pd.to_datetime(start_date)

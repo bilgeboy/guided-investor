@@ -84,6 +84,7 @@ export const StockStrategySchema = z.object({
   max_loss: z.number().positive(),
   timeframe: z.enum(Timeframes),
   start_date: z.string().optional(), // FE שולח כ-string, BE ממפה ל-date
+  end_date: z.string().optional(),
   since_ipo: z.boolean().default(false),
   entry_rules: z.array(RuleSchema).min(1),
   exit_conditions: z.array(ExitConditionSchema).min(1),

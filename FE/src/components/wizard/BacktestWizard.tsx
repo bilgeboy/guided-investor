@@ -29,6 +29,7 @@ import TradesTable from "./TradesTable";
 import api from "@/api/axiosInstance"; // ייבוא של האינסְטנס שלך
 import axios from "axios";
 import TradesChart from "../LightweughtCharts";
+import { DateField } from "../DateField";
 
 type BacktestForm = z.infer<typeof BacktestRequestSchema>;
 const STEPS = [1, 2, 3, 4, 5];
@@ -82,6 +83,7 @@ export default function BacktestWizard() {
     // אם כבר קיים סמל כזה, לא מוסיפים
     if (currentStocks.some((stock) => stock.symbol === s.toUpperCase())) return;
 
+    // TODO: MAKE THIS DYNAMIC THAT IF I UPDATE THE SCHEMA ITS UPDATED HERE ACCORDIGNLY
     setValue(
       "stocks",
       [
@@ -89,16 +91,16 @@ export default function BacktestWizard() {
         {
           symbol: s.toUpperCase(),
           investment: 1000,
-          max_loss: 100,
+          max_loss: 25,
           timeframe: "1h",
           start_date: "",
           since_ipo: false,
           entry_rules: [
             {
               indicator: "rsi",
-              params: { period: 14, source: "close" },
-              operator: "crossesBelow",
-              value: 30,
+              // params: { period: 14, source: "close" },
+              operator: "crossesAbove",
+              value: 0,
               // compare_to: "none",
               // compare_period: undefined,
             },
@@ -146,74 +148,19 @@ export default function BacktestWizard() {
 
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
-  const PAYLOAD_MOCK = {
-    stocks: [
-      {
-        symbol: "AAPL",
-        investment: 1000,
-        max_loss: 50,
-        timeframe: "1h",
-        start_date: "2021-01-01",
-        since_ipo: false,
-        entry_rules: [
-          {
-            indicator: "sma",
-            operator: "<",
-            value: 0,
-          },
-        ],
-        exit_conditions: [
-          {
-            type: "take_profit",
-            value: 100,
-          },
-          {
-            type: "stop_loss",
-            value: 50,
-          },
-        ],
-      },
-      {
-        symbol: "NVDA",
-        investment: 500,
-        max_loss: 25,
-        timeframe: "5m",
-        start_date: "2021-01-01",
-        since_ipo: false,
-        entry_rules: [
-          {
-            indicator: "sma",
-            operator: "crossesAbove",
-            value: 200,
-          },
-        ],
-        exit_conditions: [
-          {
-            type: "take_profit",
-            value: 50,
-          },
-          {
-            type: "stop_loss",
-            value: 25,
-          },
-        ],
-      },
-    ],
-  };
-
   const onRun = handleSubmit(async (payload) => {
     try {
       setRunning(true);
 
       console.log("Payload to send:", payload);
 
-      const health = await axios.get("http://localhost:8000/health");
-      console.log("Health check:", health.data);
+      // const health = await axios.get("http://localhost:8000/health");
+      // console.log("Health check:", health.data);
 
       // שליחה ישירה ל-BE
       const res = await axios.post(
         "http://localhost:8000/api/strategies-test",
-        PAYLOAD_MOCK,
+        payload,
         {
           headers: {
             "Content-Type": "application/json",
@@ -316,93 +263,177 @@ export default function BacktestWizard() {
 
           {step === 2 && (
             <section className="space-y-4">
-              {values.stocks.map((stock, index) => (
-                <Card key={index} className="p-4">
-                  <CardHeader>
-                    <CardTitle>נכס {stock.symbol || index + 1}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="grid gap-4 md:grid-cols-3">
-                    <div className="space-y-2">
-                      <Label>סכום השקעה ($)</Label>
-                      <Input
-                        type="number"
-                        value={stock.investment}
-                        onChange={(e) =>
-                          setValue(
-                            `stocks.${index}.investment`,
-                            Number(e.target.value),
-                            {
-                              shouldValidate: true,
-                            }
-                          )
-                        }
-                      />
-                      <Slider
-                        value={[stock.investment]}
-                        min={100}
-                        max={10000}
-                        step={50}
-                        onValueChange={([v]) =>
-                          setValue(`stocks.${index}.investment`, v, {
-                            shouldValidate: true,
-                          })
-                        }
-                      />
-                    </div>
+              {values.stocks.map((stock, index) => {
+                // ----- helpers to read/update exit_conditions -----
+                const getExitVal = (type: "stop_loss" | "take_profit") =>
+                  stock.exit_conditions?.find((c: any) => c.type === type)
+                    ?.value ?? 0;
 
-                    <div className="space-y-2">
-                      <Label>מקס׳ הפסד ($)</Label>
-                      <Input
-                        type="number"
-                        value={stock.max_loss}
-                        onChange={(e) =>
-                          setValue(
-                            `stocks.${index}.max_loss`,
-                            Number(e.target.value),
-                            {
-                              shouldValidate: true,
-                            }
-                          )
-                        }
-                      />
-                      <Slider
-                        value={[stock.max_loss]}
-                        min={20}
-                        max={stock.investment || 1000}
-                        step={10}
-                        onValueChange={([v]) =>
-                          setValue(`stocks.${index}.max_loss`, v, {
-                            shouldValidate: true,
-                          })
-                        }
-                      />
-                    </div>
+                const setExitVal = (
+                  type: "stop_loss" | "take_profit",
+                  val: number
+                ) => {
+                  const list = Array.isArray(stock.exit_conditions)
+                    ? [...stock.exit_conditions]
+                    : [];
+                  const i = list.findIndex((c: any) => c.type === type);
+                  if (i >= 0) list[i] = { ...list[i], type, value: val };
+                  else list.push({ type, value: val });
+                  setValue(`stocks.${index}.exit_conditions`, list, {
+                    shouldValidate: true,
+                  });
+                };
+                // --------------------------------------------------
 
-                    <div className="space-y-2">
-                      <Label>טיימפריים</Label>
-                      <Select
-                        value={stock.timeframe}
-                        onValueChange={(v) =>
-                          setValue(`stocks.${index}.timeframe`, v as any, {
+                const stopLossVal = getExitVal("stop_loss");
+                const takeProfitVal = getExitVal("take_profit");
+
+                return (
+                  <Card key={index} className="p-4">
+                    <CardHeader>
+                      <CardTitle>נכס {stock.symbol || index + 1}</CardTitle>
+                    </CardHeader>
+
+                    <CardContent className="grid gap-4 md:grid-cols-3">
+                      {/* השקעה */}
+                      <div className="space-y-2">
+                        <Label>סכום השקעה ($)</Label>
+                        <Input
+                          type="number"
+                          value={stock.investment}
+                          onChange={(e) =>
+                            setValue(
+                              `stocks.${index}.investment`,
+                              Number(e.target.value),
+                              {
+                                shouldValidate: true,
+                              }
+                            )
+                          }
+                        />
+                        <Slider
+                          value={[stock.investment]}
+                          min={100}
+                          max={10000}
+                          step={50}
+                          onValueChange={([v]) =>
+                            setValue(`stocks.${index}.investment`, v, {
+                              shouldValidate: true,
+                            })
+                          }
+                        />
+                      </div>
+
+                      {/* Stop Loss (exit_conditions.type === "stop_loss") */}
+                      <div className="space-y-2">
+                        <Label>מקס׳ הפסד ($) — Stop Loss</Label>
+                        <Input
+                          type="number"
+                          value={stopLossVal}
+                          onChange={(e) =>
+                            setExitVal("stop_loss", Number(e.target.value))
+                          }
+                        />
+                        <Slider
+                          value={[Number(stopLossVal) || 0]}
+                          min={0}
+                          max={Math.max(50, Math.round(stock.investment))} // סתם טווח סביר
+                          step={5}
+                          onValueChange={([v]) => setExitVal("stop_loss", v)}
+                        />
+                      </div>
+
+                      {/* Take Profit (exit_conditions.type === "take_profit") */}
+                      <div className="space-y-2">
+                        <Label>יעד רווח ($) — Take Profit</Label>
+                        <Input
+                          type="number"
+                          value={takeProfitVal}
+                          onChange={(e) =>
+                            setExitVal("take_profit", Number(e.target.value))
+                          }
+                        />
+                        <Slider
+                          value={[Number(takeProfitVal) || 0]}
+                          min={0}
+                          max={Math.max(100, Math.round(stock.investment * 2))} // טווח נדיב יותר
+                          step={5}
+                          onValueChange={([v]) => setExitVal("take_profit", v)}
+                        />
+                      </div>
+                    </CardContent>
+
+                    {/* טיימפריים */}
+                    <CardContent className="grid gap-4 md:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label>טיימפריים</Label>
+                        <Select
+                          value={stock.timeframe}
+                          onValueChange={(v) =>
+                            setValue(`stocks.${index}.timeframe`, v as any, {
+                              shouldValidate: true,
+                            })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="בחר" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Timeframes.map((tf) => (
+                              <SelectItem key={`tf-${index}-${tf}`} value={tf}>
+                                {tf}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+
+                    {/* תאריכים + since_ipo */}
+                    <CardContent className="grid gap-4 md:grid-cols-3">
+                      {/* start_date */}
+                      <DateField
+                        label="תאריך התחלה (start_date)"
+                        value={stock.start_date ?? ""}
+                        onChange={(v) =>
+                          setValue(`stocks.${index}.start_date`, v, {
                             shouldValidate: true,
                           })
                         }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="בחר" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Timeframes.map((tf) => (
-                            <SelectItem key={tf} value={tf}>
-                              {tf}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      />
+
+                      {/* end_date (UI בלבד אם לא בסכימה) */}
+                      <DateField
+                        label="תאריך סיום (end_date)"
+                        value={(stock as any).end_date ?? ""}
+                        onChange={(v) =>
+                          setValue(`stocks.${index}.end_date` as any, v, {
+                            shouldValidate: false,
+                          })
+                        }
+                      />
+
+                      {/* since_ipo */}
+                      <div className="space-y-2">
+                        <Label className="block">מאז ה-IPO</Label>
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            checked={stock.since_ipo}
+                            onCheckedChange={(v) =>
+                              setValue(`stocks.${index}.since_ipo`, !!v, {
+                                shouldValidate: true,
+                              })
+                            }
+                          />
+                          <span className="text-sm text-muted-foreground">
+                            אם לא הוגדר <code>end_date</code> — אפשר לסמן את זה.
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </section>
           )}
 

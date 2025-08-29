@@ -50,6 +50,7 @@ class StockStrategy(BaseModel):
     max_loss: float    # Stop Loss
     timeframe: str     # נר של דקה/שעה/יום וכו'
     start_date: Optional[date] = None
+    end_date: Optional[date] = None
     since_ipo: bool = False
     entry_rules: List[IndicatorRule]
     exit_conditions: List[ExitCondition]

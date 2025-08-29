@@ -11,7 +11,7 @@ from .check_entry import check_entry_conditions, check_exit_conditions
 from .process_trades import process_trades, summarize_trades
 from ..models import StockStrategy, BacktestRequest
 from ..settings import settings
-from ..db.ohlc_db import test_db
+from ..db.ohlc_db import test_db, get_ohlc_from_db, save_ohlc_to_db
 
 ALPHA_VANTAGE_API = settings.FINNHUB_API_KEY  # או API Key שלך ל-Alpha Vantage
 
@@ -21,13 +21,12 @@ async def run_backtest(stocks: List[StockStrategy]):
 
     for stock in stocks:
         start_date = stock.start_date.isoformat() if stock.start_date else "1900-01-01"
-        ohlc = await test_db()
-        # ohlc = await get_ohlc_from_db(stock.symbol, stock.timeframe, start_date)
-        # ohlc = await fetch_ohlc_twelve_data_5000(stock.symbol, stock.timeframe, start_date)
-    #     if not ohlc:
-    # ohlc = await fetch_ohlc_twelve_data_5000(stock.symbol, stock.timeframe, start_date)
-    # await save_ohlc_to_db(stock.symbol, stock.timeframe, start_date, datetime.now().isoformat(), ohlc)
-        ohlc = json_file_to_df()
+        end_date = stock.end_date.isoformat() if stock.end_date else datetime.now().isoformat()
+        ohlc = await get_ohlc_from_db(stock.symbol, stock.timeframe, start_date, end_date)
+        if ohlc is None or ohlc.empty:
+            ohlc = await fetch_ohlc_twelve_data_5000(stock.symbol, stock.timeframe, start_date)
+            await save_ohlc_to_db(stock.symbol, stock.timeframe, start_date, end_date, ohlc)
+        # ohlc = json_file_to_df()
         # candles = ohlc.to_json()
         ohlc = calculate_indicators(ohlc, stock.entry_rules, stock.timeframe)
         ohlc = calculate_exit_indicators(ohlc, stock.exit_conditions, stock.timeframe)

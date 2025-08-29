@@ -19,10 +19,10 @@ export default function RuleBuilder({ stockIndex }: { stockIndex: number }) {
   const { control, watch, setValue } = useFormContext<any>();
   const { fields, append, remove } = useFieldArray({
     control,
-    name: `stocks.${stockIndex}.rules`,
+    name: `stocks.${stockIndex}.entry_rules`,
   });
 
-  const rulesWatch = watch(`stocks.${stockIndex}.rules`);
+  const rulesWatch = watch(`stocks.${stockIndex}.entry_rules`);
 
   const addPreset = () =>
     append({
@@ -53,7 +53,7 @@ export default function RuleBuilder({ stockIndex }: { stockIndex: number }) {
                       value={rule.indicator}
                       onValueChange={(v) =>
                         setValue(
-                          `stocks.${stockIndex}.rules.${idx}.indicator`,
+                          `stocks.${stockIndex}.entry_rules.${idx}.indicator`,
                           v as any,
                           {
                             shouldValidate: true,
@@ -81,7 +81,7 @@ export default function RuleBuilder({ stockIndex }: { stockIndex: number }) {
                       value={rule.operator}
                       onValueChange={(v) =>
                         setValue(
-                          `stocks.${stockIndex}.rules.${idx}.operator`,
+                          `stocks.${stockIndex}.entry_rules.${idx}.operator`,
                           v as any,
                           {
                             shouldValidate: true,
@@ -125,7 +125,7 @@ export default function RuleBuilder({ stockIndex }: { stockIndex: number }) {
                       value={rule.value ?? ""}
                       onChange={(e) =>
                         setValue(
-                          `stocks.${stockIndex}.rules.${idx}.value`,
+                          `stocks.${stockIndex}.entry_rules.${idx}.value`,
                           Number(e.target.value)
                         )
                       }
@@ -144,7 +144,7 @@ export default function RuleBuilder({ stockIndex }: { stockIndex: number }) {
                         value={rule.compareTo ?? "price"}
                         onValueChange={(v) =>
                           setValue(
-                            `stocks.${stockIndex}.rules.${idx}.compareTo`,
+                            `stocks.${stockIndex}.entry_rules.${idx}.compareTo`,
                             v as any
                           )
                         }
@@ -167,7 +167,7 @@ export default function RuleBuilder({ stockIndex }: { stockIndex: number }) {
                           value={rule.comparePeriod ?? 50}
                           onChange={(e) =>
                             setValue(
-                              `stocks.${stockIndex}.rules.${idx}.comparePeriod`,
+                              `stocks.${stockIndex}.entry_rules.${idx}.comparePeriod`,
                               Number(e.target.value)
                             )
                           }
@@ -210,7 +210,7 @@ function IndicatorParams({
   stockIndex: number;
 }) {
   const { watch, setValue } = useFormContext<any>();
-  const rule = watch(`stocks.${stockIndex}.rules.${idx}`);
+  const rule = watch(`stocks.${stockIndex}.entry_rules.${idx}`);
 
   // ה־params כמו קודם, רק עם path מותאם ל-stocks
   if (
@@ -235,7 +235,7 @@ function IndicatorParams({
             }
             onChange={(e) =>
               setValue(
-                `stocks.${stockIndex}.rules.${idx}.params.period`,
+                `stocks.${stockIndex}.entry_rules.${idx}.params.period`,
                 Number(e.target.value)
               )
             }
@@ -247,7 +247,7 @@ function IndicatorParams({
             value={rule.params?.source ?? "close"}
             onValueChange={(v) =>
               setValue(
-                `stocks.${stockIndex}.rules.${idx}.params.source`,
+                `stocks.${stockIndex}.entry_rules.${idx}.params.source`,
                 v as any
               )
             }
@@ -277,7 +277,7 @@ function IndicatorParams({
             value={rule.params?.fast ?? 12}
             onChange={(e) =>
               setValue(
-                `stocks.${stockIndex}.rules.${idx}.params.fast`,
+                `stocks.${stockIndex}.entry_rules.${idx}.params.fast`,
                 Number(e.target.value)
               )
             }
@@ -290,7 +290,7 @@ function IndicatorParams({
             value={rule.params?.slow ?? 26}
             onChange={(e) =>
               setValue(
-                `stocks.${stockIndex}.rules.${idx}.params.slow`,
+                `stocks.${stockIndex}.entry_rules.${idx}.params.slow`,
                 Number(e.target.value)
               )
             }
@@ -303,7 +303,7 @@ function IndicatorParams({
             value={rule.params?.signal ?? 9}
             onChange={(e) =>
               setValue(
-                `stocks.${stockIndex}.rules.${idx}.params.signal`,
+                `stocks.${stockIndex}.entry_rules.${idx}.params.signal`,
                 Number(e.target.value)
               )
             }
@@ -315,7 +315,7 @@ function IndicatorParams({
             value={rule.params?.source ?? "close"}
             onValueChange={(v) =>
               setValue(
-                `stocks.${stockIndex}.rules.${idx}.params.source`,
+                `stocks.${stockIndex}.entry_rules.${idx}.params.source`,
                 v as any
               )
             }
@@ -345,7 +345,7 @@ function IndicatorParams({
             value={rule.params?.period ?? 20}
             onChange={(e) =>
               setValue(
-                `stocks.${stockIndex}.rules.${idx}.params.period`,
+                `stocks.${stockIndex}.entry_rules.${idx}.params.period`,
                 Number(e.target.value)
               )
             }
@@ -358,7 +358,7 @@ function IndicatorParams({
             value={rule.params?.stddev ?? 2}
             onChange={(e) =>
               setValue(
-                `stocks.${stockIndex}.rules.${idx}.params.stddev`,
+                `stocks.${stockIndex}.entry_rules.${idx}.params.stddev`,
                 Number(e.target.value)
               )
             }
@@ -370,7 +370,7 @@ function IndicatorParams({
             value={rule.params?.source ?? "close"}
             onValueChange={(v) =>
               setValue(
-                `stocks.${stockIndex}.rules.${idx}.params.source`,
+                `stocks.${stockIndex}.entry_rules.${idx}.params.source`,
                 v as any
               )
             }
