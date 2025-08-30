@@ -80,7 +80,7 @@ export default function TradesTable({ trades }: TradesTableProps) {
     },
     {
       header: "נר כניסה",
-      accessorKey: "entry_index",
+      accessorKey: "entry_date",
       cell: ({ getValue }) =>
         getValue()
           ? dateFormatter.format(new Date(getValue() as string | Date))
@@ -88,7 +88,7 @@ export default function TradesTable({ trades }: TradesTableProps) {
     },
     {
       header: "נר יציאה",
-      accessorKey: "exit_index",
+      accessorKey: "exit_date",
       cell: ({ getValue }) =>
         getValue() ? dateFormatter.format(new Date(getValue())) : "-",
     },

@@ -72,6 +72,8 @@ async def process_trades(ohlc: pd.DataFrame, stock: StockStrategy):
                 trades.append({
                     "entry_index": entry_index,
                     "exit_index": idx,
+                    "entry_date": ohlc.at[entry_index, "datetime"],
+                    "exit_date": ohlc.at[idx, "datetime"],
                     "entry_price": entry_price,
                     "exit_price": price,
                     "shares": shares,
